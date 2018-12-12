@@ -5,41 +5,62 @@ import numpy as np
    
 def calculate(x,y,id2word,id2tag,res=[]):
     entity=[]
+    flag = False
     for i in range(len(x)): #for every sen
         for j in range(len(x[0])): #for every word
             if x[i][j]==0 or y[i][j]==0:
+                if flag:
+                    res.append(entity)
+                    entity=[]
+                    flag = False
                 continue
             if id2tag[y[i][j]][0]=='B':
                 entity=[id2word[x[i][j]]+'/'+id2tag[y[i][j]]]
-            elif id2tag[y[i][j]][0]=='M' and len(entity)!=0 and entity[-1].split('/')[1][1:]==id2tag[y[i][j]][1:]:
+                flag = True
+            elif id2tag[y[i][j]][0]=='I' and len(entity)!=0 and entity[-1].split('/')[1][1:]==id2tag[y[i][j]][1:]:
                 entity.append(id2word[x[i][j]]+'/'+id2tag[y[i][j]])
-            elif id2tag[y[i][j]][0]=='E' and len(entity)!=0 and entity[-1].split('/')[1][1:]==id2tag[y[i][j]][1:]:
-                entity.append(id2word[x[i][j]]+'/'+id2tag[y[i][j]])
-                entity.append(str(i))
-                entity.append(str(j))
-                res.append(entity)
-                entity=[]
+                flag = True
             else:
+                if flag:
+                    res.append(entity)
+                    entity=[]
+                    flag = False
                 entity=[]
+    if flag:
+        res.append(entity)
+        entity=[]
+        flag = False
     return res
     
 def get_entity(x,y,id2tag):
     entity=""
+    print y[0]
+    flag = False
     res=[]
     for i in range(len(x)): #for every sen
         for j in range(len(x[0])): #for every word
             if y[i][j]==0:
+                if flag:
+                    res.append(entity)
+                    entity=[]
+                    flag = False
                 continue
             if id2tag[y[i][j]][0]=='B':
                 entity=id2tag[y[i][j]][1:]+':'+x[i][j]
-            elif id2tag[y[i][j]][0]=='M' and len(entity)!=0 :
+                flag = True
+            elif id2tag[y[i][j]][0]=='I' and len(entity)!=0 :
                 entity+=x[i][j]
-            elif id2tag[y[i][j]][0]=='E' and len(entity)!=0 :
-                entity+=x[i][j]
-                res.append(entity)
-                entity=[]
+                flag = True
             else:
+                if flag:
+                    res.append(entity)
+                    entity=[]
+                    flag = False
                 entity=[]
+    if flag:
+        res.append(entity)
+        entity=[]
+        flag = False
     return res    
     
 def write_entity(outp,x,y,id2tag):
@@ -127,7 +148,7 @@ def train(model,sess,saver,epochs,batch_size,data_train,data_test,id2word,id2tag
                 print "zhun:",0
                 
                 
-max_len = 60
+max_len = 50
 def padding(ids):
     if len(ids) >= max_len:  
         return ids[:max_len]
@@ -141,9 +162,11 @@ def padding_word(sen):
         return sen           
                   
 def test_input(model,sess,word2id,id2tag,batch_size):
+    print id2tag
     while True:
         text = raw_input("Enter your input: ").decode('utf-8');
         text = re.split(u'[，。！？、‘’“”（）]', text) 
+        print text
         text_id=[]
         for sen in text:
             word_id=[]
@@ -153,6 +176,7 @@ def test_input(model,sess,word2id,id2tag,batch_size):
                 else:
                     word_id.append(word2id["unknow"])
             text_id.append(padding(word_id))
+        print text_id
         zero_padding=[]
         zero_padding.extend([0]*max_len)
         text_id.extend([zero_padding]*(batch_size-len(text_id)))    

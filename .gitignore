@@ -1,0 +1,11 @@
+*.png
+.DS_Store
+pytorch/
+model/
+*.pyc
+log.txt
+*.pkl
+renMinRiBao/
+boson/
+wordtag.txt
+

@@ -4,6 +4,14 @@ import re
 import pandas as pd
 import numpy as np
 
+def mapper(tag):
+    if tag=='nr':
+        return 'PER'
+    if tag=='nt':
+        return 'ORG'
+    if tag=='ns':
+        return 'LOC'
+
 def wordtag():
     input_data = codecs.open('train1.txt','r','utf-8')
     output_data = codecs.open('wordtag.txt','w','utf-8')
@@ -17,18 +25,14 @@ def wordtag():
             word = word.split('/')
             if word[1]!='o':
                 if len(word[0])==1:
-                    output_data.write(word[0]+"/B_"+word[1]+" ")
-                elif len(word[0])==2:
-                    output_data.write(word[0][0]+"/B_"+word[1]+" ")
-                    output_data.write(word[0][1]+"/E_"+word[1]+" ")
+                    output_data.write(word[0]+"/B-"+mapper(word[1])+" ")
                 else:
-                    output_data.write(word[0][0]+"/B_"+word[1]+" ")
-                    for j in word[0][1:len(word[0])-1]:
-                        output_data.write(j+"/M_"+word[1]+" ")
-                    output_data.write(word[0][-1]+"/E_"+word[1]+" ")
+                    output_data.write(word[0][0]+"/B-"+mapper(word[1])+" ")
+                    for j in word[0][1:len(word[0])]:
+                        output_data.write(j+"/I-"+mapper(word[1])+" ")
             else:
                 for j in word[0]:
-                    output_data.write(j+"/o"+" ")
+                    output_data.write(j+"/O"+" ")
         output_data.write('\n')
         
             
@@ -42,28 +46,22 @@ linedata=list()
 linelabel=list()
 
 tag2id = {'' :0,
-'B_ns' :1,
-'B_nr' :2,
-'B_nt' :3,
-'M_nt' :4,
-'M_nr' :5,
-'M_ns' :6,
-'E_nt' :7,
-'E_nr' :8,
-'E_ns' :9,
-'o': 0}
+'B-PER' :1,
+'B-LOC' :2,
+'B-ORG' :3,
+'I-PER' :4,
+'I-LOC' :5,
+'I-ORG' :6,
+'O': 0}
 
 id2tag = {0:'' ,
-1:'B_ns' ,
-2:'B_nr' ,
-3:'B_nt' ,
-4:'M_nt' ,
-5:'M_nr' ,
-6:'M_ns' ,
-7:'E_nt' ,
-8:'E_nr' ,
-9:'E_ns' ,
-10: 'o'}
+1:'B-PER' ,
+2:'B-LOC' ,
+3:'B-ORG' ,
+4:'I-PER' ,
+5:'I-LOC' ,
+6:'I-ORG' ,
+10: 'O'}
 
 
 input_data = codecs.open('wordtag.txt','r','utf-8')
